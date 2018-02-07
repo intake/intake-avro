@@ -85,11 +85,6 @@ class AvroSequenceSource(base.DataSource):
                                                  metadata=metadata)
 
     def _get_schema(self):
-        if self._head is None:
-            with self._files[0] as f:
-                self._head = avrocore.read_header(f)
-
-        dtypes = self._head['dtypes']
         return base.Schema(datashape=None,
                            dtype=None,
                            shape=None,
@@ -97,14 +92,10 @@ class AvroSequenceSource(base.DataSource):
                            extra_metadata={})
 
     def _get_partition(self, i):
-        with self._files[i] as f:
-            data = f.read()
-
         import fastavro.reader
-
-        return list(fastavro.reader(io.BytesIO(data)))
+        with self._files[i] as f:
+            return list(fastavro.reader(f))
 
     def to_dask(self):
-        self.discover()
         dpart = delayed(self._get_partition)
         return db.from_delayed([dpart(i) for i in range(self.npartitions)])
