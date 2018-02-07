@@ -74,7 +74,7 @@ class AvroTableSource(base.DataSource):
 
 class AvroSequenceSource(base.DataSource):
     """
-    Source to load tabular avro datasets.
+    Source to load avro datasets as sequence of python dicts.
     """
 
     def __init__(self, urlpath, metadata=None):
