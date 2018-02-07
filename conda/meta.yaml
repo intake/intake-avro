@@ -1,0 +1,37 @@
+package:
+  name: intake-avro
+  version: 0.0.1
+
+source:
+  path: ..
+
+build:
+  number: 0
+  script:
+    - python setup.py install --single-version-externally-managed --record=record.txt
+
+requirements:
+  build:
+    - python
+  run:
+    - intake
+    - pandas
+    - dask
+    - uavro
+    - fastavro
+
+test:
+  source_files:
+    - tests
+  requires:
+    - pytest
+    - pytest-cov
+    - coverage
+  commands:
+    - py.test --verbose --cov=intake_avro tests
+
+about:
+  home: https://github.com/ContinuumIO/intake-avro
+  license: BSD
+  license_file: LICENSE
+  summary: Intake avro plugin
