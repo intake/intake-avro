@@ -24,7 +24,7 @@ class TablePlugin(base.Plugin):
 
 class SequencePlugin(base.Plugin):
     def __init__(self):
-        super(TablePlugin, self).__init__(
+        super(SequencePlugin, self).__init__(
             name='avro_sequence', version=__version__, container='python',
             partition_access=True)
 
