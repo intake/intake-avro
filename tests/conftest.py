@@ -2,5 +2,5 @@ import os.path
 
 import pytest
 
-from intake_parquet import ParquetSource
+from intake_avro import AvroSequenceSource, AvroTableSource
 
