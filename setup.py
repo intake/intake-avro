@@ -14,7 +14,7 @@ setup(
     maintainer_email='martin.durant@utoronto.ca',
     license='BSD',
     packages=find_packages(),
-    # package_data={'': ['*.pcap', '*.yml', '*.html']},
+    package_data={'': ['*.avro', '*.yml', '*.html']},
     include_package_data=True,
     install_requires=requires,
     long_description=open('README.md').read(),
