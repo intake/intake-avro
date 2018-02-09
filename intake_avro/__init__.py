@@ -92,7 +92,7 @@ class AvroSequenceSource(base.DataSource):
                            extra_metadata={})
 
     def _get_partition(self, i):
-        import fastavro.reader
+        import fastavro
         with self._files[i] as f:
             return list(fastavro.reader(f))
 
