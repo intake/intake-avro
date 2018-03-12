@@ -1,14 +1,11 @@
 language: generic
-
 os:
-  - linux
-
+- linux
 env:
   matrix:
   - CONDA_PY=36
   global:
-    secure: KZbjTZeluoWVb6piOBkXXc7EGWzGgi6P3emP4Vg4pNUNPLveY49pQF7vKIqiW7HQJgDpdbYFELJKTOtQAKWFNgWduvcISRvp0MMq4VPwRBimY0akXMYYqMi0KlnVGJJhgiviIXKYmuO71kMElQ6SKu9zxOg3C1tRBhOlLbDVnCTmmBAPSVHYhhYNFUSN8zgSneXeWuLcQ1XVt8eLj9GbMUH6hh0K7NsbUDKK+jpiBpa/phOkndRUifhRIuN1Fd/sQ4Pi4/N8Y5o7nY58AHMPzE3S2LY8ze0qMPNe527cDj2efOx0QvRIROKGveKu9MV5tyzUsto6/XF34GHV22AwRjcVN0mMoVrg5XsuLiNui3JBQST1SgTAr6z221QIz8IZATnFkMSlax1PD0Lu1XOcE1o4g8whGTqw0v5ltszu/Ym0rFu179+Cs3lC8WLBxE/CbqonZEfrYP75UwIQ54N3kJYBH7EHLxvjWktibbJAp/wWD7vCknaw9x3y8W5e6U9qXOA7a13pPASGNIbnbnkfAQ1mkDY0631jukVLbXnGZcNwmuOwdbD0Bry+uQHHFbwApfHoF/kJ3jkT7F4yTvvwhn4qzx7MEDe+go4kj0b+HBD7xi7yt52eRCY+c71L7dhw6CggQ8anCKof+pBN97sG0EJo5Q9KBYzIss7MsKsSXDg=
-
+    secure: n3G8zn+g4/k8ynAJ1qWIIwiU9UAoeNvC9Vm5E+Vdnm/t2mBZJAXR3tfeBq6WDPlkXjUMh5WFkR6Gv6G9FiUpdlv7lUp1DVwrSnrvtWQe168naa4RFn1V6o/M2KU3pcaEIpv1nTHSe03RbLMczvmlkT3Dxjf6JwPgxS7JBbD4hcECdnrM43HIMIerhDlP/HVQLrKQGJDLEFC41iNCRSF17kJ+KENT+X6bTlkPDpnAVhRUAoJerahCSIGl3rBvRFa3u0ihcSS9Pm5wDlOYo5z7Z6mkmOTm8CXsjUIDbIZgKuk4lwLH+nTceTM1Dlz6DH/BR1KZf9wCdTf84cmy+h4p1MYQOS7E/c3pifxOZDyHm1wFbBR/hrYQ5bvkQ+o/QTZFWfNURHJcfKTvWquenDGYMko4Q6oYU/r5mFY1+V0qZA21XYt8sFWYjOoy+qRuJOi7IY4kfPL8fhonXippX7nABAIPuR8Putor70APM+6g7cJtUw/KucK2sKs/H94ISNEROGMbJ+LQrajZcgiw3ptmXBb3ScV7nLVP+KnDXb8yCEkXUEcd6u94QOOPvZw1eTEXc/sAbvdb3JwCc/VYDMDBUu8hqq5OW+f6TjQ134LI2Qneihby9rtCR1k2i1HvhpP7Z1ocmEhgoNhmWtaJsDZiS3WPbsaIXH8xVaIGEtAcohk=
 install:
 - |
   echo "Installing a fresh version of Miniconda."
@@ -20,12 +17,11 @@ install:
   echo "Configuring conda."
   source $HOME/miniconda3/bin/activate root
   conda install -y conda-build anaconda-client
-
 script:
-  - conda build -c conda-forge -c "https://conda.anaconda.org/t/$ANACONDA_INTAKE_TOKEN/intake" ./conda
-  - if [[ -n "${TRAVIS_TAG}" ]]; then anaconda -t ${ANACONDA_INTAKE_TOKEN}
-    upload `conda build -c conda-forge -c intake/label/main --output ./conda`; fi
-
+- conda build -c conda-forge -c "https://conda.anaconda.org/t/$ANACONDA_TOKEN/intake"
+  ./conda
+- if [[ -n "${TRAVIS_TAG}" ]]; then anaconda -t ${ANACONDA_TOKEN} upload `conda build
+  -c conda-forge -c intake/label/main --output ./conda`; fi
 notifications:
   email: false
   on_success: change
