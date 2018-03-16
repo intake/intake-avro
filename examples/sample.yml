@@ -2,7 +2,7 @@ plugins:
   source:
     - module: intake_avro
 sources:
-  - name: test
+  test:
     description: Short example parquet data
     driver: avro_table
     args:

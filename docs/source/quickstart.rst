@@ -30,7 +30,7 @@ Assuming some avro files in
 a given path, the following would load them into a data-frame::
 
    import intake
-   source = intake.open_avro('data_path/*.avro')
+   source = intake.open_avro_table('data_path/*.avro')
    dataframe = source.read()
 
 There will be one data partition per input file, there is no random access
