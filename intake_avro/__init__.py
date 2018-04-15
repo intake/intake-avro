@@ -20,7 +20,7 @@ class TablePlugin(base.Plugin):
 
     def open(self, urlpath, **kwargs):
         """Create new AvroTableSource"""
-        storage_options = kwargs.pop('storage_options')
+        storage_options = kwargs.pop('storage_options', None)
         base_kwargs, source_kwargs = self.separate_base_kwargs(kwargs)
         return AvroTableSource(urlpath=urlpath,
                                metadata=base_kwargs['metadata'],
@@ -36,7 +36,7 @@ class SequencePlugin(base.Plugin):
 
     def open(self, urlpath, **kwargs):
         """Create new AvroSequenceSource"""
-        storage_options = kwargs.pop('storage_options')
+        storage_options = kwargs.pop('storage_options', None)
         base_kwargs, source_kwargs = self.separate_base_kwargs(kwargs)
         return AvroSequenceSource(urlpath=urlpath,
                                   metadata=base_kwargs['metadata'],
