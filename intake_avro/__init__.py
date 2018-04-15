@@ -22,7 +22,8 @@ class TablePlugin(base.Plugin):
         """Create new AvroTableSource"""
         base_kwargs, source_kwargs = self.separate_base_kwargs(kwargs)
         return AvroTableSource(urlpath=urlpath,
-                               metadata=base_kwargs['metadata'])
+                               metadata=base_kwargs['metadata'],
+                               **source_kwargs)
 
 
 class SequencePlugin(base.Plugin):
@@ -36,7 +37,8 @@ class SequencePlugin(base.Plugin):
         """Create new AvroSequenceSource"""
         base_kwargs, source_kwargs = self.separate_base_kwargs(kwargs)
         return AvroSequenceSource(urlpath=urlpath,
-                                  metadata=base_kwargs['metadata'])
+                                  metadata=base_kwargs['metadata'],
+                                  **source_kwargs)
 
 
 class AvroTableSource(base.DataSource):
@@ -49,9 +51,10 @@ class AvroTableSource(base.DataSource):
         Location of the data files; can include protocol and glob characters.
     """
 
-    def __init__(self, urlpath, metadata=None):
+    def __init__(self, urlpath, metadata=None, **kwargs):
         self._urlpath = urlpath
-        self._files = open_files(urlpath, mode='rb')
+        self._storage_options = kwargs.pop('storage_kwargs', {})
+        self._files = open_files(urlpath, mode='rb', **self._storage_options)
         self._head = None
         super(AvroTableSource, self).__init__(container='dataframe',
                                               metadata=metadata)
@@ -94,9 +97,10 @@ class AvroSequenceSource(base.DataSource):
         Location of the data files; can include protocol and glob characters.
     """
 
-    def __init__(self, urlpath, metadata=None):
+    def __init__(self, urlpath, metadata=None, **kwargs):
         self._urlpath = urlpath
-        self._files = open_files(urlpath, mode='rb')
+        self._storage_options = kwargs.pop('storage_options', {})
+        self._files = open_files(urlpath, mode='rb', **self._storage_options)
         self._head = None
         super(AvroSequenceSource, self).__init__(container='python',
                                                  metadata=metadata)
