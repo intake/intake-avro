@@ -20,10 +20,11 @@ class TablePlugin(base.Plugin):
 
     def open(self, urlpath, **kwargs):
         """Create new AvroTableSource"""
+        storage_options = kwargs.pop('storage_options')
         base_kwargs, source_kwargs = self.separate_base_kwargs(kwargs)
         return AvroTableSource(urlpath=urlpath,
                                metadata=base_kwargs['metadata'],
-                               **source_kwargs)
+                               storage_options=storage_options)
 
 
 class SequencePlugin(base.Plugin):
@@ -35,10 +36,11 @@ class SequencePlugin(base.Plugin):
 
     def open(self, urlpath, **kwargs):
         """Create new AvroSequenceSource"""
+        storage_options = kwargs.pop('storage_options')
         base_kwargs, source_kwargs = self.separate_base_kwargs(kwargs)
         return AvroSequenceSource(urlpath=urlpath,
                                   metadata=base_kwargs['metadata'],
-                                  **source_kwargs)
+                                  storage_options=storage_options)
 
 
 class AvroTableSource(base.DataSource):
@@ -51,9 +53,9 @@ class AvroTableSource(base.DataSource):
         Location of the data files; can include protocol and glob characters.
     """
 
-    def __init__(self, urlpath, metadata=None, **kwargs):
+    def __init__(self, urlpath, metadata=None, storage_options=None):
         self._urlpath = urlpath
-        self._storage_options = kwargs.pop('storage_kwargs', {})
+        self._storage_options = storage_options or {}
         self._files = open_files(urlpath, mode='rb', **self._storage_options)
         self._head = None
         super(AvroTableSource, self).__init__(container='dataframe',
@@ -97,9 +99,9 @@ class AvroSequenceSource(base.DataSource):
         Location of the data files; can include protocol and glob characters.
     """
 
-    def __init__(self, urlpath, metadata=None, **kwargs):
+    def __init__(self, urlpath, metadata=None, storage_options=None):
         self._urlpath = urlpath
-        self._storage_options = kwargs.pop('storage_options', {})
+        self._storage_options = storage_options or {}
         self._files = open_files(urlpath, mode='rb', **self._storage_options)
         self._head = None
         super(AvroSequenceSource, self).__init__(container='python',
