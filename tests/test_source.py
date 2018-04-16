@@ -1,8 +1,8 @@
 import os
 import pandas as pd
 
-from intake_avro import (AvroTableSource, TablePlugin, AvroSequenceSource,
-                         SequencePlugin)
+from intake_avro import TablePlugin
+from intake_avro.source import AvroTableSource, AvroSequenceSource
 
 here = os.path.dirname(__file__)
 path = os.path.join(here, 'twitter.avro')
