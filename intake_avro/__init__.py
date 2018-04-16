@@ -1,6 +1,7 @@
 from intake.source import base
-
-__version__ = '0.0.1'
+from ._version import get_versions
+__version__ = get_versions()['version']
+del get_versions
 
 
 class TablePlugin(base.Plugin):
@@ -36,3 +37,4 @@ class SequencePlugin(base.Plugin):
         return AvroSequenceSource(urlpath=urlpath,
                                   metadata=base_kwargs['metadata'],
                                   storage_options=storage_options)
+
