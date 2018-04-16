@@ -36,4 +36,3 @@ class SequencePlugin(base.Plugin):
         return AvroSequenceSource(urlpath=urlpath,
                                   metadata=base_kwargs['metadata'],
                                   storage_options=storage_options)
-
