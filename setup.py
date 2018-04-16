@@ -2,17 +2,13 @@
 
 from setuptools import setup, find_packages
 import versioneer
-version = versioneer.get_version(),
-cmdclass = versioneer.get_cmdclass()
-del versioneer
-
 
 requires = open('requirements.txt').read().strip().split('\n')
 
 setup(
     name='intake-avro',
-    version=version,
-    cmdclass=cmdclass,
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     description='Intake avro plugin',
     url='https://github.com/ContinuumIO/intake-avro',
     maintainer='Martin Durant',
