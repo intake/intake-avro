@@ -4,19 +4,19 @@ API Reference
 .. currentmodule:: intake_avro
 
 .. autosummary::
-   TablePlugin
-   SequencePlugin
-   source.AvroTableSource
-   source.AvroSequenceSource
+   intake_avro.TablePlugin
+   intake_avro.SequencePlugin
+   intake_avro.source.AvroTableSource
+   intake_avro.source.AvroSequenceSource
 
-.. autoclass:: TablePlugin
+.. autoclass:: intake_avro.TablePlugin
    :members:
 
-.. autoclass:: SequencePlugin
+.. autoclass:: intake_avro.SequencePlugin
    :members:
 
-.. autoclass:: source.AvroTableSource
+.. autoclass:: intake_avro.source.AvroTableSource
    :members:
 
-.. autoclass:: source.AvroSequenceSource
+.. autoclass:: intake_avro.source.AvroSequenceSource
    :members:
