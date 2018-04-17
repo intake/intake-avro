@@ -6,8 +6,8 @@ API Reference
 .. autosummary::
    TablePlugin
    SequencePlugin
-   AvroTableSource
-   AvroSequenceSource
+   source.AvroTableSource
+   source.AvroSequenceSource
 
 .. autoclass:: TablePlugin
    :members:
@@ -15,8 +15,8 @@ API Reference
 .. autoclass:: SequencePlugin
    :members:
 
-.. autoclass:: AvroTableSource
+.. autoclass:: source.AvroTableSource
    :members:
 
-.. autoclass:: AvroSequenceSource
+.. autoclass:: source.AvroSequenceSource
    :members:
