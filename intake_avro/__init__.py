@@ -5,7 +5,7 @@ del get_versions
 
 
 class TablePlugin(base.Plugin):
-    """Fast avro to dataframe reader"""
+    """Fast Avro to dataframe reader"""
 
     def __init__(self):
         super(TablePlugin, self).__init__(
@@ -23,7 +23,7 @@ class TablePlugin(base.Plugin):
 
 
 class SequencePlugin(base.Plugin):
-    """Avro to sequence of python dicts reader"""
+    """Avro to sequence of Python dicts reader"""
     def __init__(self):
         super(SequencePlugin, self).__init__(
             name='avro_sequence', version=__version__, container='python',

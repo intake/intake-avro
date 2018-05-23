@@ -10,7 +10,7 @@ from uavro import core as avrocore
 
 class AvroTableSource(base.DataSource):
     """
-    Source to load tabular avro datasets.
+    Source to load tabular Avro datasets.
 
     Parameters
     ----------
@@ -32,7 +32,7 @@ class AvroTableSource(base.DataSource):
                 self._head = avrocore.read_header(f)
 
         dtypes = self._head['dtypes']
-        # avro schemas have a "namespace" and a "name" that could be metadata
+        # Avro schemas have a "namespace" and a "name" that could be metadata
         return base.Schema(datashape=None,
                            dtype=dtypes,
                            shape=(None, len(dtypes)),
@@ -56,7 +56,7 @@ class AvroTableSource(base.DataSource):
 
 class AvroSequenceSource(base.DataSource):
     """
-    Source to load avro datasets as sequence of python dicts.
+    Source to load Avro datasets as sequence of Python dicts.
 
     Parameters
     ----------
@@ -73,7 +73,7 @@ class AvroSequenceSource(base.DataSource):
                                                  metadata=metadata)
 
     def _get_schema(self):
-        # avro schemas have a "namespace" and a "name" that could be metadata
+        # Avro schemas have a "namespace" and a "name" that could be metadata
         return base.Schema(datashape=None,
                            dtype=None,
                            shape=None,
