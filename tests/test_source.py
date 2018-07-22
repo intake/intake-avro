@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 
-from intake_avro import TablePlugin
 from intake_avro.source import AvroTableSource, AvroSequenceSource
 
 here = os.path.dirname(__file__)
@@ -18,13 +17,6 @@ columns = ['username', 'tweet', 'timestamp']
 expected = pd.DataFrame(data, columns=columns)
 
 
-def test_plugin():
-    p = TablePlugin()
-    s = p.open(path)
-    out = s.read()
-    assert out.equals(expected)
-
-
 def test_tabular():
     s = AvroTableSource(urlpath=path)
     disc = s.discover()
@@ -34,11 +26,11 @@ def test_tabular():
     assert out.equals(expected)
 
     s = AvroTableSource(urlpath=[path, path2])
-    out = s.read()
+    out = s.read().reset_index(drop=True)
     assert out.equals(pd.concat([expected, expected], ignore_index=True))
 
     s = AvroTableSource(urlpath=pathstar)
-    out = s.read()
+    out = s.read().reset_index(drop=True)
     assert out.equals(pd.concat([expected, expected], ignore_index=True))
 
 

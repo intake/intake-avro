@@ -1,11 +1,7 @@
+from intake.source import base
 import io
 
-from intake.source import base
-from dask import delayed
-import dask.dataframe as dd
-import dask.bag as db
-from dask.bytes import open_files
-from uavro import core as avrocore
+from . import __version__
 
 
 class AvroTableSource(base.DataSource):
@@ -17,16 +13,21 @@ class AvroTableSource(base.DataSource):
     urlpath: str
         Location of the data files; can include protocol and glob characters.
     """
+    version = __version__
+    container = 'dataframe'
+    name = 'avro_table'
 
     def __init__(self, urlpath, metadata=None, storage_options=None):
         self._urlpath = urlpath
         self._storage_options = storage_options or {}
-        self._files = open_files(urlpath, mode='rb', **self._storage_options)
         self._head = None
-        super(AvroTableSource, self).__init__(container='dataframe',
-                                              metadata=metadata)
+        super(AvroTableSource, self).__init__(metadata=metadata)
 
     def _get_schema(self):
+        from dask.bytes.core import open_files
+        import uavro.core as avrocore
+        self._files = open_files(self._urlpath, mode='rb',
+                                 **self._storage_options)
         if self._head is None:
             with self._files[0] as f:
                 self._head = avrocore.read_header(f)
@@ -40,18 +41,28 @@ class AvroTableSource(base.DataSource):
                            extra_metadata={})
 
     def _get_partition(self, i):
-        with self._files[i] as f:
-            data = f.read()
+        return read_file_uavro(self._files[i], self._head)
 
-        return avrocore.filelike_to_dataframe(io.BytesIO(data),
-                                              len(data), self._head, scan=True)
+    def read(self):
+        self._get_schema()
+        return self.to_dask().compute()
 
     def to_dask(self):
         """Create lazy dask dataframe object"""
+        import dask.dataframe as dd
+        from dask import delayed
         self.discover()
-        dpart = delayed(self._get_partition)
-        return dd.from_delayed([dpart(i) for i in range(self.npartitions)],
+        dpart = delayed(read_file_uavro)
+        return dd.from_delayed([dpart(f, self._head) for f in self._files],
                                meta=self.dtype)
+
+
+def read_file_uavro(f, head):
+    import uavro.core as avrocore
+    with f as f:
+        data = f.read()
+        return avrocore.filelike_to_dataframe(io.BytesIO(data), len(data),
+                                              head, scan=True)
 
 
 class AvroSequenceSource(base.DataSource):
@@ -63,16 +74,20 @@ class AvroSequenceSource(base.DataSource):
     urlpath: str
         Location of the data files; can include protocol and glob characters.
     """
+    version = __version__
+    container = 'python'
+    name = 'avro_sequence'
 
     def __init__(self, urlpath, metadata=None, storage_options=None):
         self._urlpath = urlpath
         self._storage_options = storage_options or {}
-        self._files = open_files(urlpath, mode='rb', **self._storage_options)
         self._head = None
-        super(AvroSequenceSource, self).__init__(container='python',
-                                                 metadata=metadata)
+        super(AvroSequenceSource, self).__init__(metadata=metadata)
 
     def _get_schema(self):
+        from dask.bytes.core import open_files
+        self._files = open_files(self._urlpath, mode='rb',
+                                 **self._storage_options)
         # avro schemas have a "namespace" and a "name" that could be metadata
         return base.Schema(datashape=None,
                            dtype=None,
@@ -81,11 +96,23 @@ class AvroSequenceSource(base.DataSource):
                            extra_metadata={})
 
     def _get_partition(self, i):
-        import fastavro
-        with self._files[i] as f:
-            return list(fastavro.reader(f))
+        self._get_schema()
+        return read_file_fastavro(self._files[i])
+
+    def read(self):
+        self._get_schema()
+        return self.to_dask().compute()
 
     def to_dask(self):
         """Create lazy dask bag object"""
-        dpart = delayed(self._get_partition)
-        return db.from_delayed([dpart(i) for i in range(self.npartitions)])
+        from dask import delayed
+        import dask.bag as db
+        self._get_schema()
+        dpart = delayed(read_file_fastavro)
+        return db.from_delayed([dpart(f) for f in self._files])
+
+
+def read_file_fastavro(f):
+    import fastavro
+    with f as f:
+        return list(fastavro.reader(f))
