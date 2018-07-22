@@ -5,6 +5,8 @@ This package enables the loading of Apache Avro files within the Intake data loa
 Two plugins are contained: for fast loading of strictly tabular data to pandas dataframes, and slower
 reading of more complicatedly structured data as a sequence of python dictionaries.
 
+Each avro file becomes one partition.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
