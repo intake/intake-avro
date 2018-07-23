@@ -15,7 +15,7 @@ requirements:
   build:
     - python
   run:
-    - intake
+    - intake>=0.2
     - pandas
     - dask
     - uavro
