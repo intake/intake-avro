@@ -56,6 +56,22 @@ class AvroTableSource(base.DataSource):
         return dd.from_delayed([dpart(f, self._head) for f in self._files],
                                meta=self.dtype)
 
+    def to_spark(self):
+        """Pass URL to spark to load as a DataFrame
+
+        Note that this requires ``org.apache.spark.sql.avro.AvroFileFormat``
+        to be installed in your spark classes.
+
+        This feature is experimental.
+        """
+        from intake_spark.base import SparkHolder
+        sh = SparkHolder(True, [
+            ['read'],
+            ['format', ["com.databricks.spark.avro"]],
+            ['load', [self._urlpath]]
+        ], {})
+        return sh.setup()
+
 
 def read_file_uavro(f, head):
     import uavro.core as avrocore
