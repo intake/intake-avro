@@ -51,7 +51,7 @@ class AvroTableSource(base.DataSource):
 
     def read(self):
         self._get_schema()
-        return self.compute()
+        return self._df.compute()
 
     def to_dask(self):
         """Create lazy dask dataframe object"""
