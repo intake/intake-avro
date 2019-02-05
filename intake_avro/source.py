@@ -1,5 +1,5 @@
+import copy
 from intake.source import base
-import io
 
 from . import __version__
 
@@ -12,49 +12,58 @@ class AvroTableSource(base.DataSource):
     ----------
     urlpath: str
         Location of the data files; can include protocol and glob characters.
+    blocksize: int or None
+        Partition the input files by roughly this number of bytes. Actual
+        partition sizes will depend on the inherent structure of the data
+        files. If None, each input file will be one partition, no file
+        scanning will be needed ahead of time
+    storage_options: dict or None
+        Parameters to pass on to the file-system backend
     """
     version = __version__
     container = 'dataframe'
     name = 'avro_table'
 
-    def __init__(self, urlpath, metadata=None, storage_options=None):
+    def __init__(self, urlpath, blocksize=100000000,
+                 metadata=None, storage_options=None):
         self._urlpath = urlpath
         self._storage_options = storage_options or {}
-        self._head = None
+        self._bs = blocksize
+        self._df = None
         super(AvroTableSource, self).__init__(metadata=metadata)
 
     def _get_schema(self):
-        from dask.bytes.core import open_files
-        import uavro.core as avrocore
-        self._files = open_files(self._urlpath, mode='rb',
-                                 **self._storage_options)
-        if self._head is None:
-            with self._files[0] as f:
-                self._head = avrocore.read_header(f)
+        if self._df is None:
+            from uavro import dask_read_avro
+            from uavro.core import read_header
+            from dask.bytes import open_files
+            self._df = dask_read_avro(self._urlpath, blocksize=self._bs,
+                                      storage_options=self._storage_options)
 
-        dtypes = self._head['dtypes']
-        # Avro schemas have a "namespace" and a "name" that could be metadata
+            files = open_files(self._urlpath, **self._storage_options)
+            with copy.copy(files[0]) as f:
+                # we assume the same header for all files
+                self.metadata.update(read_header(f))
+            self.npartitions = self._df.npartitions
+        dtypes = {k: str(v) for k, v in self._df.dtypes.items()}
         return base.Schema(datashape=None,
                            dtype=dtypes,
                            shape=(None, len(dtypes)),
-                           npartitions=len(self._files),
+                           npartitions=self.npartitions,
                            extra_metadata={})
 
     def _get_partition(self, i):
-        return read_file_uavro(self._files[i], self._head)
+        self._get_schema()
+        return self._df.get_partition(i).compute()
 
     def read(self):
         self._get_schema()
-        return self.to_dask().compute()
+        return self._df.compute()
 
     def to_dask(self):
         """Create lazy dask dataframe object"""
-        import dask.dataframe as dd
-        from dask import delayed
-        self.discover()
-        dpart = delayed(read_file_uavro)
-        return dd.from_delayed([dpart(f, self._head) for f in self._files],
-                               meta=self.dtype)
+        self._get_schema()
+        return self._df
 
     def to_spark(self):
         """Pass URL to spark to load as a DataFrame
@@ -73,14 +82,6 @@ class AvroTableSource(base.DataSource):
         return sh.setup()
 
 
-def read_file_uavro(f, head):
-    import uavro.core as avrocore
-    with f as f:
-        data = f.read()
-        return avrocore.filelike_to_dataframe(io.BytesIO(data), len(data),
-                                              head, scan=True)
-
-
 class AvroSequenceSource(base.DataSource):
     """
     Source to load Avro datasets as sequence of Python dicts.
@@ -89,46 +90,48 @@ class AvroSequenceSource(base.DataSource):
     ----------
     urlpath: str
         Location of the data files; can include protocol and glob characters.
+    blocksize: int or None
+        Partition the input files by roughly this number of bytes. Actual
+        partition sizes will depend on the inherent structure of the data
+        files. If None, each input file will be one partition, no file
+        scanning will be needed ahead of time
+    storage_options: dict or None
+        Parameters to pass on to the file-system backend
     """
     version = __version__
     container = 'python'
     name = 'avro_sequence'
 
-    def __init__(self, urlpath, metadata=None, storage_options=None):
+    def __init__(self, urlpath, blocksize=100000000, metadata=None,
+                 storage_options=None):
         self._urlpath = urlpath
+        self._bs = blocksize
         self._storage_options = storage_options or {}
-        self._head = None
+        self._bag = None
         super(AvroSequenceSource, self).__init__(metadata=metadata)
 
     def _get_schema(self):
-        from dask.bytes.core import open_files
-        self._files = open_files(self._urlpath, mode='rb',
-                                 **self._storage_options)
-        # avro schemas have a "namespace" and a "name" that could be metadata
+        if self._bag is None:
+            from dask.bag import read_avro
+            self._bag = read_avro(self._urlpath, blocksize=self._bs,
+                                  storage_options=self._storage_options)
+        self.npartitions = self._bag.npartitions
+
         return base.Schema(datashape=None,
                            dtype=None,
                            shape=None,
-                           npartitions=len(self._files),
+                           npartitions=self._bag.npartitions,
                            extra_metadata={})
 
     def _get_partition(self, i):
         self._get_schema()
-        return read_file_fastavro(self._files[i])
+        return self._bag.to_delayed()[i].compute()
 
     def read(self):
         self._get_schema()
-        return self.to_dask().compute()
+        return self._bag.compute()
 
     def to_dask(self):
         """Create lazy dask bag object"""
-        from dask import delayed
-        import dask.bag as db
         self._get_schema()
-        dpart = delayed(read_file_fastavro)
-        return db.from_delayed([dpart(f) for f in self._files])
-
-
-def read_file_fastavro(f):
-    import fastavro
-    with f as f:
-        return list(fastavro.reader(f))
+        return self._bag
