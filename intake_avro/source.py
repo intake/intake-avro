@@ -12,6 +12,13 @@ class AvroTableSource(base.DataSource):
     ----------
     urlpath: str
         Location of the data files; can include protocol and glob characters.
+    blocksize: int or None
+        Partition the input files by roughly this number of bytes. Actual
+        partition sizes will depend on the inherent structure of the data
+        files. If None, each input file will be one partition, no file
+        scanning will be needed ahead of time
+    storage_options: dict or None
+        Parameters to pass on to the file-system backend
     """
     version = __version__
     container = 'dataframe'
@@ -83,6 +90,13 @@ class AvroSequenceSource(base.DataSource):
     ----------
     urlpath: str
         Location of the data files; can include protocol and glob characters.
+    blocksize: int or None
+        Partition the input files by roughly this number of bytes. Actual
+        partition sizes will depend on the inherent structure of the data
+        files. If None, each input file will be one partition, no file
+        scanning will be needed ahead of time
+    storage_options: dict or None
+        Parameters to pass on to the file-system backend
     """
     version = __version__
     container = 'python'
